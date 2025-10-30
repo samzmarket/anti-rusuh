@@ -4,5 +4,5 @@
 
 1. Clone repo private:
    ```bash
-   git clone git@github.com:samzmarket/anti-rusuh-pterodactyl.git
-   cd anti-rusuh-pterodactyl
+   git clone git@github.com:samzmarket/anti-rusuh.git
+   cd anti-rusuh
