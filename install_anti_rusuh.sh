@@ -1,40 +1,29 @@
 #!/bin/bash
-# Installer Anti Rusuh Middleware Pterodactyl
-# By Samz Market
+# Installer AntiRusuhID Middleware
+# Pastikan dijalankan di server Pterodactyl
 
-set -e
+PTERO_PATH="/var/www/pterodactyl"
+SRC_MIDDLEWARE="./AntiRusuhID.php"
 
-PROJECT_PATH="/var/www/pterodactyl"
-MIDDLEWARE_PATH="$PROJECT_PATH/app/Http/Middleware"
-KERNEL_FILE="$PROJECT_PATH/app/Http/Kernel.php"
-ENV_FILE="$PROJECT_PATH/.env"
+# 1️⃣ Buat folder Middleware jika belum ada
+mkdir -p "$PTERO_PATH/app/Http/Middleware"
 
-MIDDLEWARE_FILE="AntiRusuhID.php"
+# 2️⃣ Copy file middleware
+cp "$SRC_MIDDLEWARE" "$PTERO_PATH/app/Http/Middleware/AntiRusuhID.php"
 
-echo "=== Anti Rusuh Installer ==="
+# 3️⃣ Backup Kernel.php
+KERNEL_FILE="$PTERO_PATH/app/Http/Kernel.php"
+cp "$KERNEL_FILE" "$KERNEL_FILE.bak"
 
-# Backup Kernel.php
-cp "$KERNEL_FILE" "$KERNEL_FILE.bak_$(date +%Y%m%d%H%M%S)"
-
-# Copy Middleware
-mkdir -p "$MIDDLEWARE_PATH"
-cp "$MIDDLEWARE_FILE" "$MIDDLEWARE_PATH/$MIDDLEWARE_FILE"
-
-# Tambahkan routeMiddleware di Kernel.php jika belum ada
+# 4️⃣ Tambahkan routeMiddleware jika belum ada
 if ! grep -q "'anti.rusuhid'" "$KERNEL_FILE"; then
-    sed -i "/protected \\$routeMiddleware = \\[/a \ \ \ \ 'anti.rusuhid' => \\\\Pterodactyl\\\\Http\\\\Middleware\\\\AntiRusuhID::class," "$KERNEL_FILE"
+    sed -i "/protected \$routeMiddleware = \[/a \ \ \ \ 'anti.rusuhid' => \\\Pterodactyl\\Http\\Middleware\\AntiRusuhID::class," "$KERNEL_FILE"
 fi
 
-# Tambahkan contoh .env jika belum ada
-if ! grep -q "ANTI_RUSUH_SUPER_ADMIN_ID" "$ENV_FILE"; then
-    cat <<EOL >> "$ENV_FILE"
+# 5️⃣ Clear cache Laravel
+cd "$PTERO_PATH" || exit
+php artisan config:clear
+php artisan route:clear
+php artisan cache:clear
 
-# Anti Rusuh Middleware
-ANTI_RUSUH_SUPER_ADMIN_ID=1
-ANTI_RUSUH_ALLOWED_ADMIN_IDS=45,67
-ANTI_RUSUH_BOT_API_TOKEN=tokensecret
-EOL
-fi
-
-echo "=== Instalasi selesai! ==="
-rm -- "$0"
+echo "✅ AntiRusuhID berhasil dipasang dan aktif!"
